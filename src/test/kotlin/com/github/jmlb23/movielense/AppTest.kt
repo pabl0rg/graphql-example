@@ -1,8 +1,7 @@
 package com.github.jmlb23.movielense
 
-import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Klaxon
-import com.github.jmlb23.movielense.domain.Occupation
+import com.github.jmlb23.movielense.graphql.schema.expediaSchema
 import com.github.jmlb23.movielense.graphql.schema.schema
 import org.junit.Assert
 import kotlin.test.Test
@@ -10,22 +9,33 @@ import kotlin.test.Test
 class AppTest {
 
     @Test
-    fun testAppHasAGreeting() {
-        println(schema.runCatching {
-            this.execute("""query {allUsers{
+    fun testQueryAllUsers() {
+        println(expediaSchema.execute("""query {allUsers{
+                        id
                         age
                         gender
                         }
             }
-                """.trimIndent())
-        }.fold({}, {})
-        )
+                """.trimIndent()))
+        println(expediaSchema.execute("""query {user(id: 13){
+                        id
+                        age
+                        gender
+                        }
+            }
+                """.trimIndent()))
     }
 
     @Test
     fun testMutationOnUser() {
         schema.execute("""mutation{
-                createUser(age: 27, gender: "M", occupationId: 5, zipCode: "15704")
+                createUser(age: 30, gender: "M", occupationId: 5, zipCode: "15704")
+            }
+
+            """.trimIndent()
+        )
+        schema.execute("""mutation{
+                deleteUser(id: 13)
             }
 
             """.trimIndent()
@@ -44,7 +54,7 @@ class AppTest {
 
         val idJson = schema.execute("""
                     mutation{
-                        createRate(userId: 944, movieId: 1, rating: 5)
+                        createRate(userId: 18, movieId: 1, rating: 5)
                     }
                 """.trimIndent())
 

@@ -27,6 +27,8 @@ dependencies {
     implementation("org.postgresql:postgresql:42.2.2")
     implementation("com.github.pgutkowski:kgraphql:0.3.0")
     implementation("org.http4k:http4k-server-jetty:3.102.0")
+    implementation("com.expedia:graphql-kotlin:0.2.8")
+
     // Use the Kotlin test library
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 
