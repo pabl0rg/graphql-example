@@ -8,11 +8,6 @@ import org.jetbrains.exposed.sql.*
 object OccupationRepository : Repository<Occupation>{
     private fun ResultRow.toOccupation() = Occupation(this[Occupations.id].toLong(),this[Occupations.name])
 
-    override fun filter(predicate: SqlExpressionBuilder.() -> Op<Boolean>): Sequence<Occupation> = transactionEnviroment {
-        Occupations.select(predicate).map{ it.toOccupation() }
-
-    }.asSequence()
-
     override fun add(element: Occupation): Long =
             transactionEnviroment { Occupations.insert {
                 it[name]= element.name

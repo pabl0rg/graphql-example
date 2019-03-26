@@ -43,7 +43,9 @@ object GenresMovies : Table(){
 }
 
 fun <T> transactionEnviroment(closure: () -> T): T {
-    Database.connect(url="jdbc:postgresql://localhost:5432/movielens",user="postgres",password = "def456..",driver = "org.postgresql.Driver")
-    return transaction{ closure()}
+    Database.connect(url="jdbc:postgresql://localhost:5432/movielens",user="postgres",password = "devpass",driver = "org.postgresql.Driver")
+    return transaction{
+        closure()
+    }
 }
 

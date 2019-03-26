@@ -9,11 +9,6 @@ import org.jetbrains.exposed.sql.*
 object UserRepository : Repository<User>{
     private fun ResultRow.toUser() = User(this[Users.id].toLong(),this[Users.age],this[Users.gender].toGender(),this[Users.occupationId].toLong(),this[Users.zipCode].toString())
 
-    override fun filter(predicate: SqlExpressionBuilder.() -> Op<Boolean>): Sequence<User> = transactionEnviroment {
-        Users.select(predicate).map{ it.toUser() }
-
-    }.asSequence()
-
     override fun add(element: User): Long =
             transactionEnviroment { Users.insert {
                 it[age]= element.age

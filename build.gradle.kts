@@ -25,7 +25,6 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed:0.11.2")
     implementation("org.http4k:http4k-core:3.102.0")
     implementation("org.postgresql:postgresql:42.2.2")
-    implementation("com.github.pgutkowski:kgraphql:0.3.0")
     implementation("org.http4k:http4k-server-jetty:3.102.0")
     implementation("com.expedia:graphql-kotlin:0.2.8")
 

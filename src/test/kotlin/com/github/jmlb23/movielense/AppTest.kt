@@ -1,23 +1,48 @@
 package com.github.jmlb23.movielense
 
 import com.beust.klaxon.Klaxon
-import com.github.jmlb23.movielense.graphql.schema.expediaSchema
-import com.github.jmlb23.movielense.graphql.schema.schema
+import com.github.jmlb23.movielense.graphql.schema.initGraphQLSchema
+import graphql.GraphQL
+import graphql.schema.idl.SchemaPrinter
 import org.junit.Assert
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 class AppTest {
 
+    val movieLensService = MovieLensService(
+            MockRepository(),
+            MockRepository(),
+            MockRepository(),
+            MockRepository(),
+            MockRepository()
+    )
+    val expediaSchema = initGraphQLSchema(movieLensService)
+    val expediaGraphQL = GraphQL.newGraphQL(expediaSchema).build()
+    val schemaTxt = SchemaPrinter().print(expediaSchema)
+
+    init {
+        movieLensService.createUser(10, "M", 1, "22331")
+        movieLensService.createUser(40, "F", 1, "22331")
+
+        movieLensService.createRating(0, 1, 3)
+    }
+
+    @Test
+    fun `schema should have ratings queries`() {
+        assertTrue(expediaSchema.queryType.children.any { it.name == "allRatings" })
+    }
+
     @Test
     fun testQueryAllUsers() {
-        println(expediaSchema.execute("""query {allUsers{
+        println(expediaGraphQL.execute("""query {allUsers{
                         id
                         age
                         gender
                         }
             }
                 """.trimIndent()))
-        println(expediaSchema.execute("""query {user(id: 13){
+        println(expediaGraphQL.execute("""query {user(id: 1){
                         id
                         age
                         gender
@@ -28,23 +53,23 @@ class AppTest {
 
     @Test
     fun testMutationOnUser() {
-        schema.execute("""mutation{
-                createUser(age: 30, gender: "M", occupationId: 5, zipCode: "15704")
+        println(expediaGraphQL.execute("""mutation{
+                createUser(age: 30, gender: "M", occupationId: 5, zipCode: "15704") {
+                    id
+                }
+            }
+            """.trimIndent()
+        ))
+        println(expediaGraphQL.execute("""mutation{
+                deleteUser(id: 2)
             }
 
             """.trimIndent()
-        )
-        schema.execute("""mutation{
-                deleteUser(id: 13)
-            }
-
-            """.trimIndent()
-        )
+        ))
     }
 
     @Test
     fun testMutationOnRating() {
-
         data class Element(val id: Int)
         data class Data(val allRates: List<Element>)
         data class Obj(val data: Data)
@@ -52,21 +77,23 @@ class AppTest {
         data class Data2(val createRate: Int)
         data class Obj2(val data: Data2)
 
-        val idJson = schema.execute("""
+        val idJson = expediaGraphQL.execute("""
                     mutation{
                         createRate(userId: 18, movieId: 1, rating: 5)
                     }
                 """.trimIndent())
 
-        val it = schema.execute("""
+        val it = expediaGraphQL.execute("""
             query {
-                allRates{
+                allRatings {
                     id
                 }
             }""")
 
-        val list = Klaxon().parse<Obj>(it)
-        val id = Klaxon().parse<Obj2>(idJson)
+        println(it.toString())
+        val list = Klaxon().parse<Obj>(it.toString())
+        println(idJson.toString())
+        val id = Klaxon().parse<Obj2>(idJson.toString())
 
         val last = list?.data?.allRates?.last()
 
@@ -80,15 +107,15 @@ class AppTest {
         data class Data(val getUser: String? = null)
         data class Response(val data: Data?)
 
-        schema.execute("mutation {deleteUser(id: 944)}")
+        expediaGraphQL.execute("mutation {deleteUser(id: 944)}")
         Assert.assertNull(
-        Klaxon().parse<Response>(schema.execute(
+        Klaxon().parse<Response>(expediaGraphQL.execute(
                 """query{
                         |getUser(id: 944){
                             | id
                             | gender
                         |}
-                    |}""".trimMargin()))?.data?.getUser)
+                    |}""".trimMargin()).toString())?.data?.getUser)
     }
 
     @Test
@@ -99,15 +126,15 @@ class AppTest {
         val id = 942
         val updateObject = User(id, 25, "M", 4, "14500")
 
-        val response = schema.execute("mutation{updateUser(id: $id, age: ${updateObject.age}, gender: \"${updateObject.gender}\", occupationId: ${updateObject.occupationId}, zipCode: \"${updateObject.zipCode}\" )}")
+        val response = expediaGraphQL.execute("mutation{updateUser(id: $id, age: ${updateObject.age}, gender: \"${updateObject.gender}\", occupationId: ${updateObject.occupationId}, zipCode: \"${updateObject.zipCode}\" )}")
 
-        val ResponseObj = Klaxon().parse<Response>(schema.execute("""query{getUser(id: $id){
+        val ResponseObj = Klaxon().parse<Response>(expediaGraphQL.execute("""query{getUser(id: $id){
             |id
             |age
             |gender
             |occupationId
             |zipCode
-            |}}""".trimMargin()))
+            |}}""".trimMargin()).toString())
         Assert.assertEquals(ResponseObj!!.data.getUser,updateObject)
 
     }

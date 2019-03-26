@@ -1,5 +1,6 @@
 package com.github.jmlb23.movielense.domain
 
+import com.expedia.graphql.annotations.GraphQLIgnore
 import java.util.*
 
 enum class Gender{
@@ -31,6 +32,6 @@ data class Movie(val id: Long, val name: String, val dateOfPublish: Date)
 
 data class Occupation(val id: Long, val name: String)
 
-data class Rating(val id: Long, val userId: Long, val movieId: Long, val rating: Int, val ratedAt: Date){
+data class Rating(val id: Long, val userId: Long, val movieId: Long, val rating: Int, @GraphQLIgnore val ratedAt: Date){
     constructor(userId: Long, movieId: Long, rating: Int, ratedAt: Date) : this(0,userId,movieId,rating,ratedAt)
 }

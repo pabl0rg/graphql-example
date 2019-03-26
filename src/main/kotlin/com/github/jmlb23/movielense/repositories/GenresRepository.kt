@@ -8,11 +8,6 @@ import org.jetbrains.exposed.sql.*
 object GenresRepository : Repository<Genre>{
     private fun ResultRow.toGenre() = Genre(this[Genres.id],this[Genres.name])
 
-    override fun filter(predicate: SqlExpressionBuilder.() -> Op<Boolean>): Sequence<Genre> = transactionEnviroment {
-        Genres.select(predicate).map{ it.toGenre() }
-
-    }.asSequence()
-
     override fun add(element: Genre): Long =
             transactionEnviroment {
                 Genres.insert {

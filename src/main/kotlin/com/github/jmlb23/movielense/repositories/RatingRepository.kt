@@ -9,11 +9,6 @@ import org.joda.time.DateTime
 object RatingRepository : Repository<Rating>{
     private fun ResultRow.toRating() = Rating(this[Ratings.id].toLong(),this[Ratings.userId].toLong(),this[Ratings.movieId].toLong(),this[Ratings.rating],this[Ratings.ratedAt].toDate())
 
-    override fun filter(predicate: SqlExpressionBuilder.() -> Op<Boolean>): Sequence<Rating> = transactionEnviroment {
-        Ratings.select(predicate).map{ it.toRating() }
-
-    }.asSequence()
-
     override fun add(element: Rating): Long =
             transactionEnviroment { Ratings.insert {
                 it[movieId]= element.movieId.toInt()
